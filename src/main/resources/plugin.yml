@@ -1,0 +1,6 @@
+name: ViewpointExplosionPlugin
+version: ${project.version}
+main: paruteto_plugin_01.viewpointexplosionplugin.ViewpointExplosionPlugin
+api-version: 1.16
+authors: [ paruteto ]
+description: 見た場所が爆発するプラグイン
