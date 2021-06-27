@@ -1,27 +1,26 @@
 package paruteto_plugin_01.viewpointexplosionplugin;
 
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public final class ViewpointExplosionPlugin extends JavaPlugin implements Listener {
+public final class ViewpointExplosionPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("注視点爆発プラグイン開始");
+        getLogger().info("Start ViewpointExplosionPlugin");
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-
         new BukkitRunnable() {
             @Override
             public void run() {
-                ExplosionTask.instance.update();
+                ViewpointExplosion.instance.update();
             }
         }.runTaskTimer(this, 0L, 5L);
+        Vpex vpex = new Vpex(this);
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("注視点爆発プラグイン終了");
+        getLogger().info("Finished ViewpointExplosionPlugin");
     }
 
 }
