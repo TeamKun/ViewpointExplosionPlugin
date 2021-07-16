@@ -6,4 +6,6 @@ authors: [ paruteto ]
 description: 見た場所が爆発するプラグイン
 commands:
   vpex:
-    description: aaaaaaaa
+    description: 見た場所が爆発するプラグインのコマンドです
+    usage: /<command>
+    permission: op

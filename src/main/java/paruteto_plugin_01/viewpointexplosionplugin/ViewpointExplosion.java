@@ -8,7 +8,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 public class ViewpointExplosion {
 
@@ -26,6 +28,11 @@ public class ViewpointExplosion {
     int m_nMinDistance = 5;
     int m_nMaxDistance = 50;
     int m_nExplosionPwoer = 3;
+    int m_nUpdateInterval = 20;
+
+    int m_nUpdateCnt = 0;
+
+    Random rand = new Random();
 
     public void addPlayer(Player player) {
         data.add(new Info());
@@ -38,6 +45,11 @@ public class ViewpointExplosion {
     }
 
     public void update() {
+        m_nUpdateCnt++;
+        if (m_nUpdateCnt < m_nUpdateInterval){
+            return;
+        }
+        m_nUpdateCnt = 0;
         if(pluginEnable) {
             for (Info i : data) {
                 if (!i.enable) continue;
@@ -59,7 +71,7 @@ public class ViewpointExplosion {
     }
 
     boolean cmnConf_pluginOn(CommandSender sender, String[] args){
-        sender.sendMessage("mnConf_pluginOff was called");
+        sender.sendMessage("注視点爆発プラグインを有効にしました。");
         pluginEnable = true;
         for (Info i : data) {
             i.enable = true;
@@ -67,7 +79,7 @@ public class ViewpointExplosion {
         return true;
     }
     boolean cmnConf_pluginOff(CommandSender sender, String[] args){
-        sender.sendMessage("cmnConf_pluginOff was called");
+        sender.sendMessage("注視点爆発プラグインを無効にしました。");
         pluginEnable = false;
         for (Info i : data) {
             i.enable = false;
@@ -75,26 +87,109 @@ public class ViewpointExplosion {
         return true;
     }
     boolean cmnConf_maxDistance(CommandSender sender, String[] args){
-        sender.sendMessage("cmnConf_maxDistanceを was called");
+        sender.sendMessage(String.format("爆発最大距離を%dに変更しました。", Integer.parseInt(args[2])));
         m_nMaxDistance = Integer.parseInt(args[2]);
         return true;
     }
     boolean cmnConf_minDistance(CommandSender sender, String[] args){
-        sender.sendMessage("cmnConf_minDistanceを was called");
+        sender.sendMessage(String.format("爆発最小距離を%dに変更しました。", Integer.parseInt(args[2])));
         m_nMinDistance = Integer.parseInt(args[2]);
         return true;
     }
     boolean cmnConf_power(CommandSender sender, String[] args){
-        sender.sendMessage("cmnConf_power was called");
+        sender.sendMessage(String.format("爆発規模を%dに変更しました。", Integer.parseInt(args[2])));
         m_nExplosionPwoer = Integer.parseInt(args[2]);
         return true;
     }
+    boolean cmnConf_interval(CommandSender sender, String[] args){
+        sender.sendMessage(String.format("爆発間隔を%dtickに変更しました。", Integer.parseInt(args[2])));
+        m_nUpdateInterval = Integer.parseInt(args[2]);
+        return true;
+    }
     boolean on(CommandSender sender, String[] args){
-        sender.sendMessage("on was called");
+        for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+            switch (arg) {
+                case "@a":
+                    for (Info i : data) {
+                        i.enable = true;
+                    }
+                    sender.sendMessage(String.format("全プレイヤーの爆発を有効にしました。"));
+                    break;
+
+                case "@r":
+                    int num = rand.nextInt(data.size());
+                    if(data.get(num).enable){
+                        sender.sendMessage(String.format("[%s]はすでに爆発が有効になっています。", data.get(num).player.getName()));
+                    }
+                    else{
+                        data.get(num).enable = true;
+                        sender.sendMessage(String.format("[%s]の爆発を有効にしました。", data.get(num).player.getName()));
+                    }
+                    break;
+
+                default:
+                    boolean found = false;
+                    for (Info i : data) {
+                        if (i.player.getName().matches(arg)){
+                            if(i.enable){
+                                sender.sendMessage(String.format("[%s]はすでに爆発が有効になっています。", arg));
+                            }
+                            else{
+                                i.enable = true;
+                                sender.sendMessage(String.format("[%s]の爆発を有効にしました。", arg));
+                            }
+                            found = true;
+                        }
+                    }
+                    if (!found){
+                        sender.sendMessage(String.format("プレイヤー[%s]が見つかりませんでした。", arg));
+                    }
+                    break;
+            }
+        }
         return true;
     }
     boolean off(CommandSender sender, String[] args){
-        sender.sendMessage("off was called");
+        for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+            switch (arg) {
+                case "@a":
+                    for (Info i : data) {
+                        i.enable = false;
+                    }
+                    sender.sendMessage(String.format("全プレイヤーの爆発を無効にしました。"));
+                    break;
+
+                case "@r":
+                    int num = rand.nextInt(data.size());
+                    if(!data.get(num).enable){
+                        sender.sendMessage(String.format("[%s]はすでに爆発が無効になっています。", data.get(num).player.getName()));
+                    }
+                    else{
+                        data.get(num).enable = false;
+                        sender.sendMessage(String.format("[%s]の爆発を無効にしました。", data.get(num).player.getName()));
+                    }
+                    break;
+
+                default:
+                    boolean found = false;
+                    for (Info i : data) {
+                        if (i.player.getName().matches(arg)){
+                            if(!i.enable){
+                                sender.sendMessage(String.format("[%s]はすでに爆発が無効になっています。", arg));
+                            }
+                            else{
+                                i.enable = false;
+                                sender.sendMessage(String.format("[%s]の爆発を無効にしました。", arg));
+                            }
+                            found = true;
+                        }
+                    }
+                    if (!found){
+                        sender.sendMessage(String.format("プレイヤー[%s]が見つかりませんでした。", arg));
+                    }
+                    break;
+            }
+        }
         return true;
     }
 }

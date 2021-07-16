@@ -14,7 +14,7 @@ public final class ViewpointExplosionPlugin extends JavaPlugin {
             public void run() {
                 ViewpointExplosion.instance.update();
             }
-        }.runTaskTimer(this, 0L, 5L);
+        }.runTaskTimer(this, 0, 1);
         Vpex vpex = new Vpex(this);
     }
 

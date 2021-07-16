@@ -19,14 +19,6 @@ final public class Vpex extends BaseCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
-        Bukkit.getLogger().info(sender.getName());
-        Bukkit.getLogger().info(command.getName());
-        Bukkit.getLogger().info(label);
-        for(int i = 0; i < args.length; i++)
-        {
-            Bukkit.getLogger().info(args[i]);
-        }
-
         boolean result = false;
         if (args.length == 0) {
             sender.sendMessage(DecolationConst.RED + "[/vpex]の使用法をを確認してください");
@@ -55,24 +47,31 @@ final public class Vpex extends BaseCommand {
                         break;
                     case "max-distance":
                         if (!(args.length == 3 && isNumber2(args[2]))) {
-                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf max-distance]コマンドは、第三引数に整数値を指定して下さい");
+                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf max-distance]コマンドは、第3引数に整数値を指定して下さい");
                             break;
                         }
                         result = ViewpointExplosion.instance.cmnConf_maxDistance(sender, args);
                         break;
                     case "min-distance":
                         if (!(args.length == 3 && isNumber2(args[2]))) {
-                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf min-distance]コマンドは、第三引数に整数値を指定して下さい");
+                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf min-distance]コマンドは、第3引数に整数値を指定して下さい");
                             break;
                         }
                         result = ViewpointExplosion.instance.cmnConf_minDistance(sender, args);
                         break;
                     case "power":
                         if (!(args.length == 3 && isNumber2(args[2]))) {
-                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf power]コマンドは、第三引数に整数値を指定して下さい");
+                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf power]コマンドは、第3引数に整数値を指定して下さい");
                             break;
                         }
                         result = ViewpointExplosion.instance.cmnConf_power(sender, args);
+                        break;
+                    case "interval":
+                        if (!(args.length == 3 && isNumber2(args[2]))) {
+                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf interval]コマンドは、第3引数に整数値を指定して下さい");
+                            break;
+                        }
+                        result = ViewpointExplosion.instance.cmnConf_interval(sender, args);
                         break;
                     default:
                         sender.sendMessage(DecolationConst.RED + "[/vpex cmn-conf]の使用法をを確認してください");
@@ -80,9 +79,17 @@ final public class Vpex extends BaseCommand {
                 }
                 break;
             case "on":
+                if (args.length == 1) {
+                    sender.sendMessage(DecolationConst.RED + "[vpex on]コマンドは、第2引数以降に[PlayerID]or[@a]or[@r]を指定して下さい");
+                    break;
+                }
                 ViewpointExplosion.instance.on(sender, args);
                 break;
             case "off":
+                if (args.length == 1) {
+                    sender.sendMessage(DecolationConst.RED + "[vpex off]コマンドは、第2引数以降に[PlayerID]or[@a]or[@r]を指定して下さい");
+                    break;
+                }
                 ViewpointExplosion.instance.off(sender, args);
                 break;
             default:
@@ -108,9 +115,11 @@ final public class Vpex extends BaseCommand {
                 completions.add("max-distance");
                 completions.add("min-distance");
                 completions.add("power");
+                completions.add("interval");
             }
             if(args[0].equals("on") || args[0].equals("off")){
                 completions.add("@a");
+                completions.add("@r");
                 completions.addAll(Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList()));
             }
         }
