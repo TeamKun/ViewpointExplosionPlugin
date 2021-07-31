@@ -123,6 +123,14 @@ final public class Vpex extends BaseCommand {
                 completions.addAll(Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList()));
             }
         }
+        if (args.length == 3) {
+            if (args[0].equals("cmn-conf")){
+                if (args[1].equals("max-distance") || args[1].equals("min-distance") ||
+                        args[1].equals("power") || args[1].equals("interval")){
+                    completions.add("<整数値>");
+                }
+            }
+        }
         return completions;
     }
 

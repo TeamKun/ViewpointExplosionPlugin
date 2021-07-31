@@ -7,5 +7,4 @@ description: 見た場所が爆発するプラグイン
 commands:
   vpex:
     description: 見た場所が爆発するプラグインのコマンドです
-    usage: /<command>
     permission: op

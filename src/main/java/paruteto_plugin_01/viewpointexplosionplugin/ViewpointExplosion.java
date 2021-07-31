@@ -1,5 +1,7 @@
 package paruteto_plugin_01.viewpointexplosionplugin;
 
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -23,7 +25,7 @@ public class ViewpointExplosion {
 
     List<Info> data = new ArrayList<Info>();
 
-    boolean pluginEnable = false;
+    boolean pluginEnable = true;
 
     int m_nMinDistance = 5;
     int m_nMaxDistance = 50;
@@ -33,6 +35,14 @@ public class ViewpointExplosion {
     int m_nUpdateCnt = 0;
 
     Random rand = new Random();
+
+    public void resetPlayerList(){
+        data.clear();
+        Player[] list = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+        for (Player i : list) {
+            addPlayer(i);
+        }
+    }
 
     public void addPlayer(Player player) {
         data.add(new Info());
@@ -53,6 +63,7 @@ public class ViewpointExplosion {
         if(pluginEnable) {
             for (Info i : data) {
                 if (!i.enable) continue;
+                if (i.player.getGameMode() == GameMode.SPECTATOR) continue;
                 Player player = i.player;
                 Entity entity = player.getTargetEntity(m_nMaxDistance);
                 Block block = player.getTargetBlock(m_nMaxDistance);
