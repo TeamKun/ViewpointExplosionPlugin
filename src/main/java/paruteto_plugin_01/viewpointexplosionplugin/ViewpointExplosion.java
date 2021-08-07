@@ -25,7 +25,7 @@ public class ViewpointExplosion {
 
     List<Info> data = new ArrayList<Info>();
 
-    boolean pluginEnable = true;
+    boolean pluginEnable = false;
 
     int m_nMinDistance = 5;
     int m_nMaxDistance = 50;
@@ -47,7 +47,7 @@ public class ViewpointExplosion {
     public void addPlayer(Player player) {
         data.add(new Info());
         data.get(data.size() - 1).player = player;
-        data.get(data.size() - 1).enable = pluginEnable;
+        data.get(data.size() - 1).enable = true;
     }
 
     public void delPlayer(Player player) {
@@ -84,17 +84,11 @@ public class ViewpointExplosion {
     boolean cmnConf_pluginOn(CommandSender sender, String[] args){
         sender.sendMessage("注視点爆発プラグインを有効にしました。");
         pluginEnable = true;
-        for (Info i : data) {
-            i.enable = true;
-        }
         return true;
     }
     boolean cmnConf_pluginOff(CommandSender sender, String[] args){
         sender.sendMessage("注視点爆発プラグインを無効にしました。");
         pluginEnable = false;
-        for (Info i : data) {
-            i.enable = false;
-        }
         return true;
     }
     boolean cmnConf_maxDistance(CommandSender sender, String[] args){
