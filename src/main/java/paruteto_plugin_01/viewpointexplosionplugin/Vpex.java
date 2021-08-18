@@ -31,20 +31,6 @@ final public class Vpex extends BaseCommand {
                     break;
                 }
                 switch (args[1]) {
-                    case "plugin-on":
-                        if (args.length != 2) {
-                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf plugin-on]コマンドは、3つ目以降の引数は不要です");
-                            break;
-                        }
-                        result = ViewpointExplosion.instance.cmnConf_pluginOn(sender, args);
-                        break;
-                    case "plugin-off":
-                        if (args.length != 2) {
-                            sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf plugin-off]コマンドは、3つ目以降の引数は不要です");
-                            break;
-                        }
-                        result = ViewpointExplosion.instance.cmnConf_pluginOff(sender, args);
-                        break;
                     case "max-distance":
                         if (!(args.length == 3 && isNumber2(args[2]))) {
                             sender.sendMessage(DecolationConst.RED + "[vpex cmn-conf max-distance]コマンドは、第3引数に整数値を指定して下さい");
@@ -110,8 +96,6 @@ final public class Vpex extends BaseCommand {
         }
         if (args.length == 2){
             if(args[0].equals("cmn-conf")){
-                completions.add("plugin-on");
-                completions.add("plugin-off");
                 completions.add("max-distance");
                 completions.add("min-distance");
                 completions.add("power");

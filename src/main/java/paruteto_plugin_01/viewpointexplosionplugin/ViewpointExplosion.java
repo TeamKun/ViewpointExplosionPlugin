@@ -7,25 +7,20 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class ViewpointExplosion {
 
     public static final ViewpointExplosion instance = new ViewpointExplosion();
 
-    class Info {
-        Player player;
-        boolean enable;
-    }
-
-    List<Info> data = new ArrayList<Info>();
-
-    boolean pluginEnable = false;
+    List<String> enableList = new ArrayList<String>();
 
     int m_nMinDistance = 5;
     int m_nMaxDistance = 50;
@@ -36,22 +31,9 @@ public class ViewpointExplosion {
 
     Random rand = new Random();
 
-    public void resetPlayerList(){
-        data.clear();
-        Player[] list = Bukkit.getOnlinePlayers().toArray(new Player[0]);
-        for (Player i : list) {
-            addPlayer(i);
-        }
-    }
-
-    public void addPlayer(Player player) {
-        data.add(new Info());
-        data.get(data.size() - 1).player = player;
-        data.get(data.size() - 1).enable = true;
-    }
-
-    public void delPlayer(Player player) {
-        data.removeIf(i -> i.player == player);
+    public boolean CheckList(List<String> list, String str){
+        for (String a : list) if (a.equals(str)) return true;
+        return false;
     }
 
     public void update() {
@@ -60,37 +42,25 @@ public class ViewpointExplosion {
             return;
         }
         m_nUpdateCnt = 0;
-        if(pluginEnable) {
-            for (Info i : data) {
-                if (!i.enable) continue;
-                if (i.player.getGameMode() == GameMode.SPECTATOR) continue;
-                Player player = i.player;
-                Entity entity = player.getTargetEntity(m_nMaxDistance);
-                Block block = player.getTargetBlock(m_nMaxDistance);
-                Location location;
-                if (entity != null) {
-                    location = entity.getBoundingBox().getCenter().toLocation(entity.getWorld());
-                } else if (block != null && !block.getType().equals(Material.AIR)) {
-                    location = block.getBoundingBox().getCenter().toLocation(block.getWorld());
-                } else {
-                    location = player.getEyeLocation().clone().add(player.getLocation().getDirection().multiply(m_nMaxDistance));
-                }
-                if (player.getEyeLocation().distance(location) >= m_nMinDistance)
-                    player.getWorld().createExplosion(location, m_nExplosionPwoer);
+        for (String i : enableList) {
+            Player player = Bukkit.getPlayer(i);
+            if(player == null) continue;
+            if (player.getGameMode() == GameMode.SPECTATOR) continue;
+            Entity entity = player.getTargetEntity(m_nMaxDistance);
+            Block block = player.getTargetBlock(m_nMaxDistance);
+            Location location;
+            if (entity != null) {
+                location = entity.getBoundingBox().getCenter().toLocation(entity.getWorld());
+            } else if (block != null && !block.getType().equals(Material.AIR)) {
+                location = block.getBoundingBox().getCenter().toLocation(block.getWorld());
+            } else {
+                location = player.getEyeLocation().clone().add(player.getLocation().getDirection().multiply(m_nMaxDistance));
             }
+            if (player.getEyeLocation().distance(location) >= m_nMinDistance)
+                player.getWorld().createExplosion(location, m_nExplosionPwoer);
         }
     }
 
-    boolean cmnConf_pluginOn(CommandSender sender, String[] args){
-        sender.sendMessage("注視点爆発プラグインを有効にしました。");
-        pluginEnable = true;
-        return true;
-    }
-    boolean cmnConf_pluginOff(CommandSender sender, String[] args){
-        sender.sendMessage("注視点爆発プラグインを無効にしました。");
-        pluginEnable = false;
-        return true;
-    }
     boolean cmnConf_maxDistance(CommandSender sender, String[] args){
         sender.sendMessage(String.format("爆発最大距離を%dに変更しました。", Integer.parseInt(args[2])));
         m_nMaxDistance = Integer.parseInt(args[2]);
@@ -112,41 +82,36 @@ public class ViewpointExplosion {
         return true;
     }
     boolean on(CommandSender sender, String[] args){
+        List<String> allPlayer = Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
         for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
             switch (arg) {
                 case "@a":
-                    for (Info i : data) {
-                        i.enable = true;
-                    }
                     sender.sendMessage(String.format("全プレイヤーの爆発を有効にしました。"));
+                    enableList = allPlayer;
                     break;
 
                 case "@r":
-                    int num = rand.nextInt(data.size());
-                    if(data.get(num).enable){
-                        sender.sendMessage(String.format("[%s]はすでに爆発が有効になっています。", data.get(num).player.getName()));
+                    int num = rand.nextInt(allPlayer.size());
+                    if(CheckList(enableList, allPlayer.get(num))){
+                        sender.sendMessage(String.format("[%s]はすでに爆発が有効になっています。", allPlayer.get(num)));
                     }
                     else{
-                        data.get(num).enable = true;
-                        sender.sendMessage(String.format("[%s]の爆発を有効にしました。", data.get(num).player.getName()));
+                        sender.sendMessage(String.format("[%s]の爆発を有効にしました。", allPlayer.get(num)));
+                        enableList.add(allPlayer.get(num));
                     }
                     break;
 
                 default:
-                    boolean found = false;
-                    for (Info i : data) {
-                        if (i.player.getName().matches(arg)){
-                            if(i.enable){
-                                sender.sendMessage(String.format("[%s]はすでに爆発が有効になっています。", arg));
-                            }
-                            else{
-                                i.enable = true;
-                                sender.sendMessage(String.format("[%s]の爆発を有効にしました。", arg));
-                            }
-                            found = true;
+                    if (CheckList(allPlayer, arg)){
+                        if (CheckList(enableList, arg)){
+                            sender.sendMessage(String.format("[%s]はすでに爆発が有効になっています。", arg));
+                        }
+                        else{
+                            sender.sendMessage(String.format("[%s]の爆発を有効にしました。", arg));
+                            enableList.add(arg);
                         }
                     }
-                    if (!found){
+                    else{
                         sender.sendMessage(String.format("プレイヤー[%s]が見つかりませんでした。", arg));
                     }
                     break;
@@ -155,43 +120,38 @@ public class ViewpointExplosion {
         return true;
     }
     boolean off(CommandSender sender, String[] args){
+        List<String> allPlayer = Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
         for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
             switch (arg) {
                 case "@a":
-                    for (Info i : data) {
-                        i.enable = false;
-                    }
                     sender.sendMessage(String.format("全プレイヤーの爆発を無効にしました。"));
+                    enableList.clear();
                     break;
 
                 case "@r":
-                    int num = rand.nextInt(data.size());
-                    if(!data.get(num).enable){
-                        sender.sendMessage(String.format("[%s]はすでに爆発が無効になっています。", data.get(num).player.getName()));
+                    int num = rand.nextInt(allPlayer.size());
+                    if(!CheckList(enableList, allPlayer.get(num))){
+                        sender.sendMessage(String.format("[%s]はすでに爆発が無効になっています。", allPlayer.get(num)));
                     }
                     else{
-                        data.get(num).enable = false;
-                        sender.sendMessage(String.format("[%s]の爆発を無効にしました。", data.get(num).player.getName()));
+                        sender.sendMessage(String.format("[%s]の爆発を無効にしました。", allPlayer.get(num)));
+                        enableList.remove(enableList.indexOf(allPlayer.get(num)));
                     }
                     break;
 
                 default:
-                    boolean found = false;
-                    for (Info i : data) {
-                        if (i.player.getName().matches(arg)){
-                            if(!i.enable){
+                        if(!CheckList(enableList, arg)){
+                            if (!CheckList(allPlayer, arg)){
+                                sender.sendMessage(String.format("プレイヤー[%s]が見つかりませんでした。", arg));
+                            }
+                            else {
                                 sender.sendMessage(String.format("[%s]はすでに爆発が無効になっています。", arg));
                             }
-                            else{
-                                i.enable = false;
-                                sender.sendMessage(String.format("[%s]の爆発を無効にしました。", arg));
-                            }
-                            found = true;
                         }
-                    }
-                    if (!found){
-                        sender.sendMessage(String.format("プレイヤー[%s]が見つかりませんでした。", arg));
-                    }
+                        else{
+                            sender.sendMessage(String.format("[%s]の爆発を無効にしました。", arg));
+                            enableList.remove(enableList.indexOf(arg));
+                        }
                     break;
             }
         }

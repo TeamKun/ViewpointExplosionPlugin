@@ -16,7 +16,6 @@ public final class ViewpointExplosionPlugin extends JavaPlugin {
             }
         }.runTaskTimer(this, 0, 1);
         Vpex vpex = new Vpex(this);
-        ViewpointExplosion.instance.resetPlayerList();
     }
 
     @Override
